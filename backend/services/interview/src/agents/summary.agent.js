@@ -3,13 +3,28 @@ import llm from "../config/llm.js";
 
 export const summaryAgent = async (data) => {
     try {
-        const prompt = feedbackPrompt(data);
+        const prompt = summaryPrompt(data);
+
         const response = await llm.invoke(prompt);
-        
-        const cleaned = response.content.replace(/```json/g, "").replace(/```/g, "").trim();
-        
-        return JSON.parse(cleaned);
+
+        const content =
+            typeof response.content === "string"
+                ? response.content
+                : JSON.stringify(response.content);
+
+        const cleaned = content
+            .replace(/```json/g, "")
+            .replace(/```/g, "")
+            .trim();
+
+        const summary = JSON.parse(cleaned);
+
+        return summary;
+
     } catch (error) {
-        return res.status(500).json({ message: "An error occurred during the summary process" , error: error.message });
+        console.error("❌ Summary agent error:", error);
+
+        // DO NOT use res.status()
+        throw error;
     }
-} 
+};

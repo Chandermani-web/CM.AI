@@ -1,0 +1,27 @@
+{
+  "name": "services",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Backend microservices for authentication, resume processing, interviews, roadmaps, and billing.",
+  "main": "index.js",
+  "scripts": {
+    "auth": "npm --prefix auth run dev",
+    "resume": "npm --prefix resume run dev",
+    "interview": "npm --prefix interview run dev",
+    "roadmap": "npm --prefix roadmap run dev",
+    "billing": "npm --prefix billing run dev",
+    "dev": "concurrently -n AUTH,RESUME,INTERVIEW,ROADMAP,BILLING \"npm run auth\" \"npm run resume\" \"npm run interview\" \"npm run roadmap\" \"npm run billing\"",
+    "start": "concurrently -n AUTH,RESUME,INTERVIEW,ROADMAP,BILLING \"npm run auth:start\" \"npm run resume:start\" \"npm run interview:start\" \"npm run roadmap:start\" \"npm run billing:start\"",
+    "auth:start": "npm --prefix auth run start",
+    "resume:start": "npm --prefix resume run start",
+    "interview:start": "npm --prefix interview run start",
+    "roadmap:start": "npm --prefix roadmap run start",
+    "billing:start": "npm --prefix billing run start"
+  },
+  "keywords": [ "microservices", "backend", "nodejs", "express", "authentication", "resume", "interview", "roadmap", "billing" ],
+  "author": "Chandermani",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
+}

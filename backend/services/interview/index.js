@@ -13,12 +13,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get('/', (req, res) => {
-  res.send('Hello from the Resume service!');
+  res.send('Hello from the Interview service!');
 });
 
 app.use('/', interviewRouter); 
 
 app.listen(port, () => {
-  console.log(`Resume service is running on port ${port}`);
+  console.log(`Interview service is running on port ${port}`);
   connectDB();
 });

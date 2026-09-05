@@ -11,5 +11,8 @@
   "description": "",
   "dependencies": {
     "ioredis": "^6.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5"
   }
 }

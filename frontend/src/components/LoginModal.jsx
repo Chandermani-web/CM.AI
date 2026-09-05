@@ -19,7 +19,7 @@ const LoginModal = ({ isOpen, onClose }) => {
       if (token) {
         const response = await api('/api/auth/login/', {
           method: 'POST',
-          body: JSON.stringify({ token }),
+          body: { token },
         });
 
         if (!response.ok) {
