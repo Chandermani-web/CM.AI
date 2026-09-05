@@ -1,65 +1,86 @@
 import graph from "../graph/graph.js";
 import Interview from "../models/interview.model.js";
+import redis from "../../../../shared/redis/redis.js";
 
 export const startInterview = async (req, res) => {
-  try {
-    const userId = req.headers["x-user-id"];
-    const { type, role, useResume, resume = {} } = req.body;
+    try {
+        const userId = req.headers["x-user-id"];
+        const {
+            type,
+            role,
+            useResume = false,
+            resume = {}
+        } = req.body;
 
-    if (!type || !role) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Missing required fields: type and role are required",
+        if (!userId || !type || !role) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing required fields: userId, type and role are required",
+            });
+        }
+
+        // Normalize type because schema expects lowercase values
+        const interviewType = type.toLowerCase();
+
+        if (!["technical", "hr"].includes(interviewType)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid interview type. Must be technical or hr",
+            });
+        }
+
+        const result = await graph.invoke({
+            action: "start",
+            role,
+            type: interviewType,
+            useResume,
+            resume,
+        });
+
+        // The graph already generated the complete question list
+        const questions = result?.questions;
+
+        if (!Array.isArray(questions) || questions.length === 0) {
+            return res.status(500).json({
+                success: false,
+                message: "Failed to generate interview questions",
+            });
+        }
+
+        // Make sure every question matches questionSchema
+        const formattedQuestions = questions.map((q) => ({
+            question: q.question,
+            userAnswer: q.userAnswer || "",
+            difficulty: q.difficulty || "easy",
+            timer: q.timer || 60,
+            feedback: q.feedback || {},
+        }));
+
+        const interview = await Interview.create({
+            userId,
+            type: interviewType,
+            role,
+            useResume,
+            questions: formattedQuestions,
+            currentQuestion: 0,
+            status: "in-progress",
+        });
+
+        return res.status(200).json({
+            success: true,
+            interviewId: interview._id,
+            currentQuestion: 0,
+            totalQuestions: interview.questions.length,
+            question: interview.questions[0],
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message,
         });
     }
-
-    const result = await graph.invoke({
-      action: "start",
-      role,
-      type,
-      useResume,
-      resume,
-    });
-
-    const question = result.question;
-
-    if (!question || question.length === 0) {
-      return res
-        .status(500)
-        .json({
-          success: false,
-          message: "Failed to generate interview question",
-        });
-    }
-
-    const interview = await Interview.create({
-      userId,
-      type,
-      role,
-      useResume,
-      resume,
-      questions: [question],
-      currentQuestion: 0,
-      status: "in-progress",
-    });
-
-    return res
-      .status(200)
-      .json({
-        success: true,
-        interviewId: interview._id,
-        currentQuestion: 0,
-        totalQuestions: interview.questions.length,
-        question: interview.questions[0],
-      });
-
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Internal Server Error", error: error.message });
-  }
 };
 
 export const submitAnswer = async (req, res) => {
@@ -119,13 +140,33 @@ export const submitAnswer = async (req, res) => {
             interview.currentQuestion += 1;
         } 
 
-        if(completed) {
+        if (completed) {
+            if (!result?.report) {
+                throw new Error("Summary report was not generated");
+            }
+
             interview.status = "completed";
-            interview.overallScore = result.report.overallScore;
-            interview.summary = result.report.summary;
-            interview.recommendations = result.report.recommendations;
-            interview.strengths = result.report.strengths;
-            interview.weaknesses = result.report.weaknesses;
+
+            interview.overallScore =
+                Number(result.report.overallScore) || 0;
+
+            interview.summary =
+                result.report.summary || "";
+
+            interview.recommendations =
+                Array.isArray(result.report.recommendations)
+                    ? result.report.recommendations
+                    : [];
+
+            interview.strengths =
+                Array.isArray(result.report.strengths)
+                    ? result.report.strengths
+                    : [];
+
+            interview.weaknesses =
+                Array.isArray(result.report.weaknesses)
+                    ? result.report.weaknesses
+                    : [];
         }
 
         await interview.save();
@@ -146,9 +187,9 @@ export const submitAnswer = async (req, res) => {
 export const getInterview = async (req, res) => {
     try {
         const userId = req.headers["x-user-id"];
-        const { interviewId } = req.params;
+        const { id } = req.params;
 
-        const interview = await Interview.findOne({ _id: interviewId, userId });
+        const interview = await Interview.findOne({ _id: id, userId });
 
         if(!interview) {
             return res.status(404).json({
@@ -164,5 +205,22 @@ export const getInterview = async (req, res) => {
     } catch (error) {
         return res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
-
 }
+
+export const getAllInterviews = async (req, res) => {
+    try {
+        const userId = req.headers["x-user-id"];
+
+        const interviews = await Interview.find({ userId });
+
+        return res.status(200).json({
+            success: true,
+            interviews,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};

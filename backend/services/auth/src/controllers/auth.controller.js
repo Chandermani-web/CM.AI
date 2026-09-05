@@ -102,3 +102,44 @@ export const useCoin = async (req, res) => {
         return res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
     }
 }
+
+export const addCoin = async (req, res) => {
+    try {
+        const sessionId = req.cookies?.session;
+        const { coins } = req.body;
+
+        if (!sessionId) {
+            return res.status(400).json({ success: false, message: 'No session found' });
+        }
+
+        const sessionData = await redis.get(`session:${sessionId}`);
+        if (!sessionData) {
+            return res.status(400).json({ success: false, message: 'Invalid session' });
+        }
+
+        const session = JSON.parse(sessionData);
+        
+        const user = await User.findById(session.userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        if(!coins || coins <= 0) {
+            return res.status(400).json({ success: false, message: 'Invalid coin amount' });
+        }
+
+        user.interviewCoin += Number(coins);
+
+        await user.save();
+
+        await redis.set(`session:${sessionId}`, JSON.stringify({
+            ...session,
+            interviewCoin: user.interviewCoin
+        }), 'EX', 7 * 24 * 60 * 60);
+        
+        return res.status(200).json({ success: true, message: 'Coin added successfully', interviewCoin: user.interviewCoin });
+
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    }
+}
