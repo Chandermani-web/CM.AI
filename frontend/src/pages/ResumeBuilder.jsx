@@ -67,13 +67,40 @@ const STEPS = [
 
 // --- shared input styles ---
 const inputClass =
-  'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/25 focus:outline-none focus:border-white/40 transition-colors';
+  'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/25 focus:outline-none focus:border-[#F5A524]/50 focus:ring-1 focus:ring-[#F5A524]/20 transition-colors';
 const labelClass = 'text-xs font-medium tracking-wider uppercase text-white/40 mb-2 block';
 
 const Field = ({ label, children }) => (
   <div>
     <label className={labelClass}>{label}</label>
     {children}
+  </div>
+);
+
+const FontImport = () => (
+  <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap');
+    .font-mono-r { font-family: 'IBM Plex Mono', 'SF Mono', monospace; }
+    @media print {
+      body * { visibility: hidden; }
+      #resume-preview, #resume-preview * { visibility: visible; }
+      #resume-preview {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        box-shadow: none !important;
+        border: none !important;
+      }
+      .no-print { display: none !important; }
+    }
+  `}</style>
+);
+
+/* Small underline mark used as a section signature in the resume preview */
+const SectionMark = ({ children }) => (
+  <div className="mt-6">
+    <h2 className="text-xs font-bold tracking-widest uppercase text-black">{children}</h2>
+    <div className="h-[3px] w-6 bg-[#F5A524] rounded-full mt-1.5 mb-2.5" />
   </div>
 );
 
@@ -122,6 +149,14 @@ const ResumeBuilder = () => {
   const removeListItem = (listKey, id) =>
     setFormData((prev) => ({ ...prev, [listKey]: prev[listKey].filter((item) => item.id !== id) }));
 
+  const toggleCurrentRole = (id, checked) =>
+    setFormData((prev) => ({
+      ...prev,
+      experience: prev.experience.map((item) =>
+        item.id === id ? { ...item, current: checked, endDate: checked ? '' : item.endDate } : item
+      ),
+    }));
+
   // --- skills ---
   const addSkill = () => {
     const trimmed = skillInput.trim();
@@ -140,26 +175,12 @@ const ResumeBuilder = () => {
   const handleDownload = () => window.print();
 
   return (
-    <div className="bg-[#FAF9F6] min-h-screen">
-      {/* Print styles: only the resume sheet is visible when printing */}
-      <style>{`
-        @media print {
-          body * { visibility: hidden; }
-          #resume-preview, #resume-preview * { visibility: visible; }
-          #resume-preview {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            box-shadow: none !important;
-            border: none !important;
-          }
-          .no-print { display: none !important; }
-        }
-      `}</style>
+    <div className="bg-[#0E1013] min-h-screen">
+      <FontImport />
 
       {/* ===== NAVBAR ===== */}
       <motion.nav
-        className="fixed top-0 left-0 right-0 w-full bg-[#FAF9F6]/90 backdrop-blur-xl border-b border-black/5 h-[64px] z-50 flex items-center px-6 no-print"
+        className="fixed top-0 left-0 right-0 w-full bg-[#0E1013]/90 backdrop-blur-xl border-b border-white/[0.06] h-[64px] z-50 flex items-center px-6 no-print"
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
@@ -167,12 +188,12 @@ const ResumeBuilder = () => {
         <div className="flex items-center justify-between w-full max-w-6xl mx-auto">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <GiArtificialHive size={26} className="text-black" />
-              <span className="font-serif font-bold text-xl text-black tracking-tight">
-                CM<span className="text-black/40">.AI</span>
+              <GiArtificialHive size={26} className="text-white" />
+              <span className="font-serif font-bold text-xl text-white tracking-tight">
+                CM<span className="text-white/40">.AI</span>
               </span>
             </div>
-            <span className="text-xs font-medium tracking-wider uppercase bg-black/5 text-black/50 px-3 py-1 rounded-full border border-black/5">
+            <span className="text-xs font-medium tracking-wider uppercase bg-white/5 text-white/50 px-3 py-1 rounded-full border border-white/10">
               Resume Builder
             </span>
           </div>
@@ -181,7 +202,7 @@ const ResumeBuilder = () => {
             onClick={() => navigate(-1)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.97 }}
-            className="inline-flex items-center gap-2 text-sm text-black/50 hover:text-black transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors"
           >
             <FiArrowLeft size={15} />
             Back
@@ -207,17 +228,17 @@ const ResumeBuilder = () => {
                         whileTap={{ scale: 0.95 }}
                         className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${
                           active
-                            ? 'bg-black text-white'
+                            ? 'bg-white text-[#0E1013]'
                             : done
-                            ? 'bg-black/80 text-white'
-                            : 'bg-black/5 text-black/30 border border-black/10'
+                            ? 'bg-[#F5A524] text-[#161615]'
+                            : 'bg-white/5 text-white/30 border border-white/10'
                         }`}
                       >
                         {done ? <FiCheck size={15} /> : <Icon size={14} />}
                       </motion.button>
                       <span
                         className={`text-[10px] tracking-wide uppercase hidden sm:block ${
-                          active ? 'text-black font-medium' : 'text-black/30'
+                          active ? 'text-white font-medium' : 'text-white/30'
                         }`}
                       >
                         {s.label}
@@ -226,7 +247,7 @@ const ResumeBuilder = () => {
                     {i < STEPS.length - 1 && (
                       <div
                         className={`flex-1 h-px mx-2 transition-colors ${
-                          i < stepIndex ? 'bg-black/60' : 'bg-black/10'
+                          i < stepIndex ? 'bg-[#F5A524]/60' : 'bg-white/10'
                         }`}
                       />
                     )}
@@ -249,7 +270,10 @@ const ResumeBuilder = () => {
                   transition={{ duration: 0.3 }}
                   className="bg-[#161615] rounded-3xl p-8 shadow-xl shadow-black/10 no-print"
                 >
-                  <h2 className="font-serif text-2xl font-bold text-white mb-1">{step.label}</h2>
+                  <span className="font-mono-r text-[11px] tracking-[0.2em] text-[#F5A524] uppercase">
+                    Step {String(stepIndex + 1).padStart(2, '0')} / {String(STEPS.length).padStart(2, '0')}
+                  </span>
+                  <h2 className="font-serif text-2xl font-bold text-white mt-1 mb-1">{step.label}</h2>
                   <p className="text-white/40 text-sm mb-6">
                     {step.id === 'personal' && 'How recruiters will reach you.'}
                     {step.id === 'summary' && 'A punchy 2-3 sentence pitch.'}
@@ -378,12 +402,24 @@ const ResumeBuilder = () => {
                               />
                               <input
                                 className={inputClass}
-                                placeholder="End / Present"
-                                value={exp.endDate}
+                                placeholder="End"
+                                value={exp.current ? 'Present' : exp.endDate}
+                                disabled={exp.current}
                                 onChange={(e) => updateListItem('experience', exp.id, 'endDate', e.target.value)}
                               />
                             </div>
                           </div>
+
+                          <label className="flex items-center gap-2 text-xs text-white/40 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={exp.current}
+                              onChange={(e) => toggleCurrentRole(exp.id, e.target.checked)}
+                              className="accent-[#F5A524] w-3.5 h-3.5"
+                            />
+                            I currently work here
+                          </label>
+
                           <textarea
                             rows={4}
                             className={inputClass}
@@ -605,17 +641,15 @@ const ResumeBuilder = () => {
               {isLast && (
                 <div className="flex items-center justify-between mb-5 no-print">
                   <div>
-                    <span className="text-xs font-medium tracking-widest uppercase text-black/30">
-                      Step 7 of 7
+                    <span className="font-mono-r text-[11px] tracking-widest uppercase text-white/30">
+                      Step {STEPS.length} of {STEPS.length}
                     </span>
-                    <h2 className="font-serif text-2xl font-bold text-black mt-1">
-                      Your resume is ready
-                    </h2>
+                    <h2 className="font-serif text-2xl font-bold text-white mt-1">Your resume is ready</h2>
                   </div>
                   <div className="flex items-center gap-3">
                     <button
                       onClick={goBack}
-                      className="inline-flex items-center gap-2 text-sm text-black/50 hover:text-black transition-colors"
+                      className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors"
                     >
                       <FiArrowLeft size={14} /> Edit
                     </button>
@@ -623,7 +657,7 @@ const ResumeBuilder = () => {
                       onClick={handleDownload}
                       whileHover={{ scale: 1.03 }}
                       whileTap={{ scale: 0.97 }}
-                      className="inline-flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-black/85 transition-colors shadow-lg shadow-black/20"
+                      className="inline-flex items-center gap-2 bg-white text-[#0E1013] px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white/90 transition-colors shadow-lg shadow-black/40"
                     >
                       <FiDownload size={14} /> Download PDF
                     </motion.button>
@@ -639,10 +673,10 @@ const ResumeBuilder = () => {
                 className="bg-white text-black rounded-2xl shadow-xl shadow-black/5 border border-black/5 p-10 font-sans"
                 style={{ minHeight: isLast ? '600px' : 'auto' }}
               >
-                <h1 className="text-2xl font-bold tracking-tight">
+                <h1 className="text-[26px] font-bold tracking-tight">
                   {formData.personal.fullName || 'Your Name'}
                 </h1>
-                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-black/60">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2.5 text-xs text-black/60">
                   {formData.personal.email && (
                     <span className="inline-flex items-center gap-1">
                       <FiMail size={11} /> {formData.personal.email}
@@ -669,30 +703,25 @@ const ResumeBuilder = () => {
                     </span>
                   )}
                 </div>
+                <div className="h-px bg-black/10 mt-4" />
 
                 {formData.summary && (
-                  <section className="mt-6">
-                    <h2 className="text-xs font-bold tracking-widest uppercase border-b border-black/15 pb-1 mb-2">
-                      Summary
-                    </h2>
+                  <section>
+                    <SectionMark>Summary</SectionMark>
                     <p className="text-sm leading-relaxed text-black/80">{formData.summary}</p>
                   </section>
                 )}
 
                 {formData.skills.length > 0 && (
-                  <section className="mt-6">
-                    <h2 className="text-xs font-bold tracking-widest uppercase border-b border-black/15 pb-1 mb-2">
-                      Skills
-                    </h2>
-                    <p className="text-sm text-black/80">{formData.skills.join(' \u2022 ')}</p>
+                  <section>
+                    <SectionMark>Skills</SectionMark>
+                    <p className="text-sm text-black/80">{formData.skills.join('  \u00b7  ')}</p>
                   </section>
                 )}
 
                 {formData.experience.some((e) => e.title || e.company) && (
-                  <section className="mt-6">
-                    <h2 className="text-xs font-bold tracking-widest uppercase border-b border-black/15 pb-1 mb-2">
-                      Experience
-                    </h2>
+                  <section>
+                    <SectionMark>Experience</SectionMark>
                     <div className="space-y-4">
                       {formData.experience
                         .filter((e) => e.title || e.company)
@@ -703,8 +732,9 @@ const ResumeBuilder = () => {
                                 {exp.title}
                                 {exp.company ? ` — ${exp.company}` : ''}
                               </p>
-                              <span className="text-xs text-black/40">
-                                {exp.startDate} {exp.startDate || exp.endDate ? '–' : ''} {exp.endDate}
+                              <span className="font-mono-r text-[11px] text-black/40 tracking-tight">
+                                {exp.startDate} {exp.startDate || exp.endDate || exp.current ? '–' : ''}{' '}
+                                {exp.current ? 'Present' : exp.endDate}
                               </span>
                             </div>
                             {exp.location && <p className="text-xs text-black/40">{exp.location}</p>}
@@ -727,10 +757,8 @@ const ResumeBuilder = () => {
                 )}
 
                 {formData.projects.some((p) => p.name) && (
-                  <section className="mt-6">
-                    <h2 className="text-xs font-bold tracking-widest uppercase border-b border-black/15 pb-1 mb-2">
-                      Projects
-                    </h2>
+                  <section>
+                    <SectionMark>Projects</SectionMark>
                     <div className="space-y-3">
                       {formData.projects
                         .filter((p) => p.name)
@@ -743,11 +771,11 @@ const ResumeBuilder = () => {
                               ) : null}
                             </p>
                             {proj.description && (
-                              <p className="text-sm text-black/70 leading-relaxed mt-0.5">
-                                {proj.description}
-                              </p>
+                              <p className="text-sm text-black/70 leading-relaxed mt-0.5">{proj.description}</p>
                             )}
-                            {proj.link && <p className="text-xs text-black/40 mt-0.5">{proj.link}</p>}
+                            {proj.link && (
+                              <p className="font-mono-r text-[11px] text-black/40 mt-0.5">{proj.link}</p>
+                            )}
                           </div>
                         ))}
                     </div>
@@ -755,10 +783,8 @@ const ResumeBuilder = () => {
                 )}
 
                 {formData.education.some((e) => e.institution) && (
-                  <section className="mt-6">
-                    <h2 className="text-xs font-bold tracking-widest uppercase border-b border-black/15 pb-1 mb-2">
-                      Education
-                    </h2>
+                  <section>
+                    <SectionMark>Education</SectionMark>
                     <div className="space-y-2">
                       {formData.education
                         .filter((e) => e.institution)
@@ -770,7 +796,7 @@ const ResumeBuilder = () => {
                               {edu.field ? `, ${edu.field}` : ''}
                               {edu.gpa ? ` (${edu.gpa})` : ''}
                             </p>
-                            <span className="text-xs text-black/40">
+                            <span className="font-mono-r text-[11px] text-black/40 tracking-tight">
                               {edu.startDate} {edu.startDate || edu.endDate ? '–' : ''} {edu.endDate}
                             </span>
                           </div>
