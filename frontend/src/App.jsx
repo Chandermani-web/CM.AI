@@ -14,10 +14,11 @@ import InterviewPage from './pages/InterviewPage.jsx';
 import InterviewReport from './pages/InterviewReport.jsx';
 import InterviewHistory from './pages/InterviewHistory.jsx';
 import Billing from './pages/Billing.jsx';
+import Roadmap from './pages/Roadmap.jsx';
 
 const App = () => {
   const dispatch = useDispatch();
-  const { user, auth } = useSelector((state) => state.auth);
+  const { auth } = useSelector((state) => state.auth);
 
   const [loading, setLoading] = useState(true);
 
@@ -79,13 +80,14 @@ const App = () => {
     <>
       <Routes>
         <Route path="/" element={auth ? <Navigate to="/dashboard" replace/> : <Home />} />
-        <Route path="/dashboard" element={auth ? <Dashboard /> : <Navigate to="/" replace />} />
-        <Route path="/scorer" element={auth ? <Scorer /> : <Navigate to="/" replace />} />
-        <Route path="/resume-builder" element={auth ? <ResumeBuilder /> : <Navigate to="/" replace />} />
         <Route path="/interview" element={auth ? <InterviewStart /> : <Navigate to="/" replace />} />
         <Route path="/interview/:id" element={auth ? <InterviewPage /> : <Navigate to="/" replace />} />
         <Route path="/interview/:id/report" element={auth ? <InterviewReport /> : <Navigate to="/" replace />} />
         <Route path="/interview/history" element={auth ? <InterviewHistory /> : <Navigate to="/" replace />} />
+        <Route path="/dashboard" element={auth ? <Dashboard /> : <Navigate to="/" replace />} />
+        <Route path="/roadmap" element={auth ? <Roadmap /> : <Navigate to="/" replace />} />
+        <Route path="/resume-builder" element={auth ? <ResumeBuilder /> : <Navigate to="/" replace />} />
+        <Route path="/scorer" element={auth ? <Scorer /> : <Navigate to="/" replace />} />
         <Route path="/billing" element={auth ? <Billing /> : <Navigate to="/" replace />} />
       </Routes>
     </>

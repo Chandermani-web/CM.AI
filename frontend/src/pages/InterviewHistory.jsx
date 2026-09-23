@@ -34,10 +34,13 @@ const InterviewHistory = () => {
       setLoading(true);
       setError("");
       const result = await getAllInterviews();
-      setInterviews(result?.interviews || []);
+      const list =
+        result?.interviews || result?.data || (Array.isArray(result) ? result : []);
+      setInterviews(Array.isArray(list) ? list : []);
     } catch (err) {
       console.error("Error fetching interview history:", err);
       setError("Unable to load interview history.");
+      setInterviews([]);
     } finally {
       setLoading(false);
     }
@@ -55,13 +58,17 @@ const InterviewHistory = () => {
 
   const formatDate = (date) => {
     if (!date) return "Unknown date";
-    return new Date(date).toLocaleString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    try {
+      return new Date(date).toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return "Unknown date";
+    }
   };
 
   const getStatusStyle = (status) => {
@@ -118,7 +125,7 @@ const InterviewHistory = () => {
                   <FiFileText size={22} />
                 </div>
                 <div>
-                  <h1 className="text-3xl md:text-4xl font-bold text-white">Interview History</h1>
+                  <h1 className="font-serif text-3xl md:text-4xl font-bold text-white">Interview History</h1>
                   <p className="text-white/50 mt-1">View all your completed and in-progress interviews</p>
                 </div>
               </div>
@@ -140,17 +147,17 @@ const InterviewHistory = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             <div className="bg-[#161615] rounded-2xl p-5 border border-white/[0.06]">
               <p className="text-sm text-white/50">Total Interviews</p>
-              <p className="text-3xl font-bold text-white mt-2">{interviews.length}</p>
+              <p className="font-serif text-3xl font-bold text-white mt-2">{interviews.length}</p>
             </div>
             <div className="bg-[#161615] rounded-2xl p-5 border border-white/[0.06]">
               <p className="text-sm text-white/50">Completed</p>
-              <p className="text-3xl font-bold text-white mt-2">
+              <p className="font-serif text-3xl font-bold text-white mt-2">
                 {interviews.filter((item) => item.status === "completed").length}
               </p>
             </div>
             <div className="bg-[#161615] rounded-2xl p-5 border border-white/[0.06]">
               <p className="text-sm text-white/50">In Progress</p>
-              <p className="text-3xl font-bold text-white mt-2">
+              <p className="font-serif text-3xl font-bold text-white mt-2">
                 {interviews.filter((item) => item.status === "in-progress").length}
               </p>
             </div>
@@ -180,7 +187,7 @@ const InterviewHistory = () => {
             <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-5">
               <FiFileText size={26} className="text-white/50" />
             </div>
-            <h2 className="text-xl font-semibold text-white">No interviews yet</h2>
+            <h2 className="font-serif text-xl font-semibold text-white">No interviews yet</h2>
             <p className="text-white/50 mt-2 mb-6">Create your first interview to see it here.</p>
             <button onClick={() => navigate("/interview")} className="bg-white text-black px-6 py-3 rounded-xl hover:bg-white/90 transition">
               Create Interview
@@ -255,7 +262,7 @@ const InterviewHistory = () => {
                   <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-5">
                     <FiFilter size={26} className="text-white/50" />
                   </div>
-                  <h2 className="text-xl font-semibold text-white">No matching interviews</h2>
+                  <h2 className="font-serif text-xl font-semibold text-white">No matching interviews</h2>
                   <p className="text-white/50 mt-2 mb-6">Try adjusting or clearing your filters.</p>
                   <button onClick={resetFilters} className="bg-white text-black px-6 py-3 rounded-xl hover:bg-white/90 transition">
                     Clear filters
@@ -275,7 +282,7 @@ const InterviewHistory = () => {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-3">
-                            <h2 className="text-lg font-semibold text-white">{interview.role || "Technical Interview"}</h2>
+                            <h2 className="font-serif text-lg font-semibold text-white">{interview.role || "Technical Interview"}</h2>
                             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-medium capitalize ${getStatusStyle(interview.status)}`}>
                               {getStatusIcon(interview.status)}
                               {interview.status}
@@ -290,9 +297,9 @@ const InterviewHistory = () => {
                         <div className="flex items-center justify-between md:justify-end gap-6">
                           <div className="text-right">
                             <p className="text-xs text-white/40 uppercase tracking-wide">Score</p>
-                            <p className="text-2xl font-bold text-white">
+                            <p className="font-serif text-2xl font-bold text-white">
                               {interview.overallScore ?? 0}
-                              <span className="text-sm text-white/40">/100</span>
+                              <span className="text-sm text-white/40 font-sans">/100</span>
                             </p>
                           </div>
                           <FiChevronRight size={22} className="text-white/30 group-hover:text-white group-hover:translate-x-1 transition" />

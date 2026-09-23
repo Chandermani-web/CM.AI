@@ -17,7 +17,7 @@ export const useCoin = async (data) => {
     try {
         const response = await api("/api/auth/use-coins", {
             method: 'POST',
-            body: JSON.stringify(data),
+            body: data,
         });
         const result = await response.json();
         console.log(`useCoin response for action ${data.action}:`, result);

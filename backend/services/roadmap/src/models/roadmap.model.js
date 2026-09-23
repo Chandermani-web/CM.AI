@@ -53,7 +53,7 @@ const RoadmapSchema = new mongoose.Schema({
     },
 
     duration: {
-        type: Number,
+        type: String,
         required: true
     },
 
@@ -70,5 +70,5 @@ const RoadmapSchema = new mongoose.Schema({
 
 },{ timestamps: true });
 
-const RoadmapModel = mongoose.model('Roadmap', RoadmapSchema);
-export default RoadmapModel;
+const Roadmap = mongoose.model('Roadmap', RoadmapSchema);
+export default Roadmap;

@@ -4,7 +4,7 @@ export const startInterview = async (data) => {
   try {
     const response = await api("/api/interview/start", {
       method: "POST",
-      body: JSON.stringify(data),
+      body: data,
     });
     console.log("Interview started successfully:", response);
     return response;
@@ -18,7 +18,7 @@ export const submitAnswer = async (data) => {
   try {
     const response = await api("/api/interview/answer", {
       method: "POST",
-      body: JSON.stringify(data),
+      body: data,
     });
     const result = await response.json();
     console.log("Answer submitted successfully:", result);
